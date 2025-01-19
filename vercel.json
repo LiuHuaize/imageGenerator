@@ -3,11 +3,5 @@
     "api/generate-image/*.ts": {
       "maxDuration": 300
     }
-  },
-  "routes": [
-    {
-      "source": "/api/generate-image",
-      "destination": "/api/generate-image"
-    }
-  ]
+  }
 } 
