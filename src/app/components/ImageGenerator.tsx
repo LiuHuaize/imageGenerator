@@ -1,15 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Loader2, Sparkles, Download, RefreshCw, Image as ImageIcon, AlertCircle, Pencil, Wand2 } from 'lucide-react';
+import { auth } from '@/lib/firebase/firebase';
+import { saveDesign } from '@/lib/firebase/designService';
 
 export default function ImageGenerator() {
   const [prompt, setPrompt] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const generateImage = async () => {
+    if (!auth.currentUser) {
+      setError('请先登录');
+      router.push('/login');
+      return;
+    }
+
     if (!prompt.trim()) {
       setError('请输入描述文字');
       return;
@@ -19,6 +29,8 @@ export default function ImageGenerator() {
       setLoading(true);
       setError(null);
       
+      // 1. 生成图片
+      console.log('Generating image with prompt:', prompt);
       const response = await fetch('/api/generate-image', {
         method: 'POST',
         headers: {
@@ -33,10 +45,23 @@ export default function ImageGenerator() {
         throw new Error(data.error || '生成图片失败');
       }
 
-      setImage(Array.isArray(data.prediction) ? data.prediction[0] : data.prediction);
+      const imageUrl = Array.isArray(data.prediction) ? data.prediction[0] : data.prediction;
+      console.log('Image generated successfully:', imageUrl);
+      setImage(imageUrl);
+
+      // 2. 保存到Firebase
+      try {
+        console.log('Saving to Firebase...');
+        await saveDesign(auth.currentUser.uid, prompt, imageUrl);
+        console.log('Saved to Firebase successfully');
+      } catch (saveError) {
+        console.error('Error saving to Firebase:', saveError);
+        // 不阻止用户看到生成的图片，但显示保存失败的提示
+        setError('图片已生成，但保存失败，请稍后重试');
+      }
     } catch (err: any) {
+      console.error('Generation error:', err);
       setError(err.message || '生成失败,请重试');
-      console.error('Error:', err);
     } finally {
       setLoading(false);
     }

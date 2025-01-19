@@ -1,4 +1,4 @@
-import ImageGenerator from './components/ImageGenerator';
+import ImageGenerator from '@/app/components/ImageGenerator';
 import { Sparkles, Wand2, Zap, Palette, Gauge } from 'lucide-react';
 
 export default function Home() {
