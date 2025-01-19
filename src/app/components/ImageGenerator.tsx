@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Sparkles, Download, RefreshCw, Image as ImageIcon, AlertCircle, Pencil, Wand2 } from 'lucide-react';
 import { auth } from '@/lib/firebase/firebase';
 import { saveDesign } from '@/lib/firebase/designService';
+import Image from 'next/image';
 
 export default function ImageGenerator() {
   const [prompt, setPrompt] = useState('');
@@ -155,10 +156,12 @@ export default function ImageGenerator() {
           <div className="animate-[fadeIn_0.5s_ease-out]">
             <div className="relative group/image">
               <div className="aspect-[16/9] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white ring-1 ring-gray-200 transition-all duration-500 group-hover/image:shadow-xl group-hover/image:shadow-orange-100/30 group-hover/image:ring-orange-200">
-                <img
+                <Image
                   src={image}
                   alt="Generated artwork"
+                  fill
                   className="object-cover w-full h-full transform transition-all duration-700 ease-out will-change-transform group-hover/image:scale-[1.02]"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               </div>
               {/* Enhanced overlay controls */}

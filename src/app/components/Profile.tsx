@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase/firebase';
 import { User } from 'firebase/auth';
 import { LogOut, User as UserIcon } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
@@ -46,17 +47,15 @@ export default function Profile() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-1 hover:bg-orange-50 rounded-full transition-all duration-200"
       >
-        {user.photoURL ? (
-          <img
-            src={user.photoURL}
-            alt={user.displayName || '用户头像'}
-            className="w-8 h-8 rounded-full ring-2 ring-white"
-          />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-            <span className="text-orange-600 font-medium">
-              {user.displayName?.[0] || user.email?.[0] || 'U'}
-            </span>
+        {user?.photoURL && (
+          <div className="relative w-10 h-10">
+            <Image
+              src={user.photoURL}
+              alt="Profile"
+              fill
+              className="rounded-full"
+              sizes="40px"
+            />
           </div>
         )}
       </button>

@@ -7,6 +7,7 @@ import { getUserDesigns, deleteDesign } from '@/lib/firebase/designService';
 import { Design } from '@/types/design';
 import { Download, Trash2, Loader2, Wand2, ImageIcon, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function MyDesignsPage() {
   const [designs, setDesigns] = useState<Design[]>([]);
@@ -154,37 +155,39 @@ export default function MyDesignsPage() {
             className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden animate-scale-in"
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className="aspect-[16/9] relative overflow-hidden">
-              <img
+            <div className="relative aspect-square w-full">
+              <Image
                 src={design.imageUrl}
                 alt={design.prompt}
-                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                fill
+                className="object-cover rounded-lg"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                  <p className="text-sm line-clamp-2 mb-3 opacity-90">
-                    {design.prompt}
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                <p className="text-sm line-clamp-2 mb-3 opacity-90">
+                  {design.prompt}
+                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs opacity-75">
+                    {new Date(design.createdAt).toLocaleDateString()}
                   </p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs opacity-75">
-                      {new Date(design.createdAt).toLocaleDateString()}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleDownload(design.imageUrl)}
-                        className="p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors duration-200"
-                        title="下载作品"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(design.id)}
-                        className="p-2 bg-white/10 hover:bg-red-500/80 rounded-lg backdrop-blur-sm transition-colors duration-200"
-                        title="删除作品"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleDownload(design.imageUrl)}
+                      className="p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-sm transition-colors duration-200"
+                      title="下载作品"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(design.id)}
+                      className="p-2 bg-white/10 hover:bg-red-500/80 rounded-lg backdrop-blur-sm transition-colors duration-200"
+                      title="删除作品"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>
