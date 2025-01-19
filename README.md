@@ -1,6 +1,22 @@
-# Ansh & Riley Full-Stack Template
+# Image Generator
 
-This is a full-stack template project for Software Composers to create  applications with AI.
+AI-powered image generation application built with Next.js and Replicate API.
+
+## Features
+
+- AI Image Generation
+- Real-time image creation
+- User authentication
+- Image history
+- Download generated images
+
+## Tech Stack
+
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- Firebase
+- Replicate API
 
 ## Getting started
 To create a new project, you go to `/paths`, choose from our list of Paths, and then use Cursor's Composer feature to quickly scaffold your project!
