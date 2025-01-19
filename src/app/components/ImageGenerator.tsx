@@ -32,37 +32,70 @@ export default function ImageGenerator() {
       
       // 1. 生成图片
       console.log('Generating image with prompt:', prompt);
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }),
-      });
+      
+      // 添加重试机制
+      let retryCount = 0;
+      const maxRetries = 3;
+      let success = false;
+      let imageUrl = null;
 
-      const data = await response.json();
+      while (retryCount < maxRetries && !success) {
+        try {
+          const response = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt }),
+          });
 
-      if (!response.ok) {
-        throw new Error(data.error || '生成图片失败');
+          const data = await response.json();
+
+          if (!response.ok) {
+            if (response.status === 504) {
+              console.log(`Attempt ${retryCount + 1} timed out, retrying...`);
+              retryCount++;
+              continue;
+            }
+            throw new Error(data.error || '生成图片失败');
+          }
+
+          imageUrl = Array.isArray(data.prediction) ? data.prediction[0] : data.prediction;
+          if (!imageUrl) {
+            throw new Error('生成的图片URL无效');
+          }
+          
+          success = true;
+          console.log('Image generated successfully:', imageUrl);
+          setImage(imageUrl);
+        } catch (err) {
+          if (retryCount === maxRetries - 1) {
+            throw err;
+          }
+          retryCount++;
+          console.log(`Attempt ${retryCount} failed, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒后重试
+        }
       }
 
-      const imageUrl = Array.isArray(data.prediction) ? data.prediction[0] : data.prediction;
-      console.log('Image generated successfully:', imageUrl);
-      setImage(imageUrl);
-
       // 2. 保存到Firebase
-      try {
-        console.log('Saving to Firebase...');
-        await saveDesign(auth.currentUser.uid, prompt, imageUrl);
-        console.log('Saved to Firebase successfully');
-      } catch (saveError) {
-        console.error('Error saving to Firebase:', saveError);
-        // 不阻止用户看到生成的图片，但显示保存失败的提示
-        setError('图片已生成，但保存失败，请稍后重试');
+      if (success && imageUrl) {
+        try {
+          console.log('Saving to Firebase...');
+          await saveDesign(auth.currentUser.uid, prompt, imageUrl);
+          console.log('Saved to Firebase successfully');
+        } catch (saveError) {
+          console.error('Error saving to Firebase:', saveError);
+          setError('图片已生成，但保存失败，请稍后重试');
+        }
       }
     } catch (err: any) {
       console.error('Generation error:', err);
-      setError(err.message || '生成失败,请重试');
+      if (err.message.includes('timeout') || err.message.includes('超时')) {
+        setError('生成超时，请重试或简化您的描述');
+      } else {
+        setError(err.message || '生成失败，请重试');
+      }
     } finally {
       setLoading(false);
     }
